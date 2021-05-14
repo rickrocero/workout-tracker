@@ -1,6 +1,7 @@
 const db = require('../models')
 const router = require('express').Router();
 
+// Exercise APIs
 // Create an exercise
 router.post('/api/exercises', async (req,res) => {
     try {
@@ -9,7 +10,7 @@ router.post('/api/exercises', async (req,res) => {
     } catch (err) {
         res.status(500).json(err);
     }
-})
+});
 
 // Get all exercises
 router.get('/api/exercises', async (req,res) => {
@@ -19,27 +20,29 @@ router.get('/api/exercises', async (req,res) => {
     } catch (err) {
         res.status(500).json(err);
     }
-})
+});
 
+
+// Workout APIs
 // Create a workout 
 router.post('/api/workouts', async (req,res) => {
     try {
-        const newWorkout = await db.Workout.create(req.body);
+        const newWorkout = await db.Workout.create({});
         res.status(200).json(newWorkout);
     } catch (err) {
         res.status(500).json(err);
     }
-})
+});
 
 // Get all workouts
 router.get('/api/workouts', async (req,res) => {
     try {
-        const allWorkouts = await db.Workout.find();
+        const allWorkouts = await db.Workout.aggregate([{$addFields:{totalDuration:{$sum:"$exercises.duration"}}}])
         res.status(200).json(allWorkouts);
     } catch (err) {
         res.status(500).json(err);
     }
-})
+});
 
 // Update a workout
 router.put('/api/workouts/:id', async (req,res) => {
@@ -53,6 +56,16 @@ router.put('/api/workouts/:id', async (req,res) => {
     } catch (err) {
         res.status(500).json(err);
     }
-})
+});
+
+// Get total duration of workouts from past 7 days
+router.get('/api/workouts/range', async (req,res) => {
+    try {
+        const allWorkouts = await db.Workout.aggregate([{$addFields:{totalDuration:{$sum:"$exercises.duration"}}}]).sort({_id:-1}).limit(7)
+        res.status(200).json(allWorkouts);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
 
 module.exports = router;
