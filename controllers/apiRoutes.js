@@ -42,9 +42,13 @@ router.get('/api/workouts', async (req,res) => {
 })
 
 // Update a workout
-router.put('/api/workouts/addexercise/:workoutid/:exerciseid', async (req,res) => {
+router.put('/api/workouts/:id', async (req,res) => {
     try {
-        const updatedWorkout = await db.Workout.findOneAndUpdate({_id:req.params.workoutid},{$push:{exercises:req.params.exerciseid}},{new:true});
+        const updatedWorkout = await db.Workout.findOneAndUpdate(
+            {_id:req.params.id},
+            {$push:{exercises:req.body}},
+            {new:true}
+        );
         res.status(200).json(updatedWorkout);
     } catch (err) {
         res.status(500).json(err);
